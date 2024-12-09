@@ -1,7 +1,7 @@
 {
   "name": "type-explorer",
   "description": "A runtime type analysis tool with support for multiple schema adapters",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "license": "MIT",
   "author": "Mohamed Achaq <hi@achaq.dev>",
   "main": "dist/index.js",
