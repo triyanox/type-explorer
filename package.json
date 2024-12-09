@@ -28,7 +28,9 @@
     "test": "bun test"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "keywords": [
     "bun",
