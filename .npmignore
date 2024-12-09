@@ -1,0 +1,52 @@
+# Source
+src/
+
+# Tests
+__tests__/
+*.test.ts
+*.spec.ts
+jest.config.js
+
+# Examples
+examples/
+
+# Development configs
+.eslintrc
+.eslintignore
+.prettierrc
+.prettierignore
+tsconfig.json
+.editorconfig
+
+# Git
+.git/
+.gitignore
+
+# Environment
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules/
+
+# Build artifacts
+coverage/
+.nyc_output/
+
+# Lock files
+package-lock.json
+yarn.lock
+bun.lockb
+
+# Misc
+.DS_Store
+*.tgz
+.npmrc 
