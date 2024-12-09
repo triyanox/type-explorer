@@ -1,103 +1,99 @@
 # type-explorer
 
-A powerful runtime type analysis utility for JavaScript/TypeScript that provides detailed structural analysis of values and their types, with support for automatic schema generation.
+A powerful runtime type analysis and schema generation utility for TypeScript/JavaScript that provides deep structural analysis of values and automatic schema generation for popular validation libraries.
 
-## Features
+## Key Features
 
-### Core Type Analysis
+- **Deep Type Analysis**
 
-- Deep inspection of objects, arrays, and complex data structures
-- Circular reference detection
-- Configurable analysis depth and detail level
-- Support for built-in types (Date, RegExp, Map, Set, etc.)
-- Custom type handler registration
-- Function parameter analysis
-- Prototype chain inspection
-- Support for TypedArrays and Symbols
-- Accessor (getter/setter) detection
-- Predefined configuration presets
+  - Comprehensive inspection of complex data structures
+  - Circular reference detection
+  - Support for all JavaScript built-in types
+  - Custom type handler registration
+  - Configurable analysis depth
 
-### Schema Generation
+- **Schema Generation**
 
-- Automatic schema generation from runtime data
-- Multiple schema adapter support
-- Built-in Zod adapter
-- Extensible adapter interface for other validation libraries
-- Type-safe schema generation
-- Support for complex nested structures
-- Array and union type inference
-- Optional and nullable field support
+  - Multi-library support (Zod, Joi, Yup, OpenAPI)
+  - Type-safe schema generation
+  - Automatic type inference
+  - Support for complex nested structures
+
+- **Developer Experience**
+  - TypeScript-first design
+  - Extensive configuration options
+  - Predefined analysis presets
+  - Detailed type information
 
 ## Installation
 
 ```bash
-# bun
+# Using bun
 bun add type-explorer
 
-# pnpm
-pnpm add type-explorer
-
-# npm
+# Using npm
 npm install type-explorer
 
-# yarn
+# Using yarn
 yarn add type-explorer
+
+# Using pnpm
+pnpm add type-explorer
 ```
 
-## Basic Usage
-
-### Type Analysis
+## Quick Start
 
 ```typescript
 import { TypeAnalyzer } from "type-explorer";
 
+// Initialize analyzer
 const analyzer = new TypeAnalyzer();
+
+// Analyze data structure
 const result = analyzer.analyze({
+  user: {
+    id: 1,
+    name: "John Doe",
+    roles: ["admin", "user"],
+    lastLogin: new Date(),
+  },
+});
+
+// Generate schema (e.g., using Zod)
+import { ZodSchemaAdapter } from "type-explorer";
+const zodAdapter = new ZodSchemaAdapter();
+const schema = zodAdapter.generateSchemaFromData(data);
+```
+
+## Core Concepts
+
+### Type Analysis
+
+The `TypeAnalyzer` provides detailed information about your data structures:
+
+```typescript
+const analysis = analyzer.analyze({
   name: "John",
   age: 30,
   hobbies: ["reading", "coding"],
+  metadata: {
+    lastLogin: new Date(),
+    preferences: { theme: "dark" },
+  },
 });
 ```
 
-### Schema Generation
+### Analysis Configuration
 
-```typescript
-import { ZodSchemaAdapter } from "type-explorer";
-import { z } from "zod"; // Required for Zod schemas
-
-// Initialize the adapter
-const zodAdapter = new ZodSchemaAdapter();
-
-// Generate schema from data
-const data = {
-  user: {
-    id: 1,
-    name: "John",
-    email: "john@example.com",
-  },
-};
-
-// Generate schema string
-const schemaString = zodAdapter.generateSchemaFromData(data);
-
-// Create the actual schema
-const schema = new Function("z", `return ${schemaString}`)(z);
-
-// Use the schema for validation
-const validationResult = schema.safeParse(data);
-```
-
-## Configuration
-
-### Type Analyzer Configuration
+Customize the analysis depth and detail level:
 
 ```typescript
 const analyzer = new TypeAnalyzer({
-  maxDepth: 10,
-  includeMethods: true,
-  includeGettersSetters: true,
-  includePrototype: true,
-  includePrivateProps: false,
+  maxDepth: 10, // Maximum recursion depth
+  includeMethods: true, // Include function analysis
+  includeGettersSetters: true, // Include accessor properties
+  includePrototype: true, // Include prototype chain
+  includePrivateProps: false, // Exclude private properties
 });
 ```
 
@@ -106,80 +102,99 @@ const analyzer = new TypeAnalyzer({
 ```typescript
 import { CONFIG_PRESETS } from "type-explorer";
 
-// Available presets:
-const analyzer = new TypeAnalyzer(CONFIG_PRESETS.MINIMAL); // Quick surface-level analysis
-const analyzer = new TypeAnalyzer(CONFIG_PRESETS.STANDARD); // Balanced depth and detail
-const analyzer = new TypeAnalyzer(CONFIG_PRESETS.DETAILED); // Deep inspection including private properties
+// Quick surface-level analysis
+const minimalAnalyzer = new TypeAnalyzer(CONFIG_PRESETS.MINIMAL);
+
+// Balanced depth and detail (default)
+const standardAnalyzer = new TypeAnalyzer(CONFIG_PRESETS.STANDARD);
+
+// Deep inspection including private properties
+const detailedAnalyzer = new TypeAnalyzer(CONFIG_PRESETS.DETAILED);
 ```
 
-## Schema Adapters
+## Schema Generation
 
-### Built-in Zod Adapter
-
-1. Install dependencies:
-
-```bash
-npm install zod
-```
-
-2. Basic usage:
+### Zod Schemas
 
 ```typescript
 import { ZodSchemaAdapter } from "type-explorer";
 import { z } from "zod";
 
 const zodAdapter = new ZodSchemaAdapter();
-
-// Generate schema directly from data
-const schemaString = zodAdapter.generateSchemaFromData(myData);
+const schemaString = zodAdapter.generateSchemaFromData(data);
 const schema = new Function("z", `return ${schemaString}`)(z);
+
+console.log(schema.parse(data));
 ```
 
-### Supported Types in Zod Adapter
+Supported types:
 
-The Zod adapter supports automatic schema generation for:
+- Primitives (`string`, `number`, `boolean`, `null`, `undefined`)
+- Complex types (`object`, `array`, `Date`, `enum`, `union`)
+- Modifiers (`optional`, `nullable`)
 
-- Primitive Types
-  - `string`
-  - `number`
-  - `boolean`
-  - `null`
-  - `undefined`
-- Complex Types
-  - `object` (nested objects)
-  - `array` (including mixed type arrays)
-  - `Date`
-  - `enum`
-  - `union`
-  - `optional`
-  - `nullable`
-
-### Creating Custom Schema Adapters
-
-You can create adapters for other validation libraries by implementing the `SchemaAdapter` interface:
+### Joi Schemas
 
 ```typescript
-export interface SchemaAdapter {
-  // Generate schema from type information
-  generateSchema(typeInfo: any): string;
+import { JoiSchemaAdapter } from "type-explorer";
+import * as Joi from "joi";
 
-  // Generate schema directly from data
-  generateSchemaFromData(data: any): string;
+const joiAdapter = new JoiSchemaAdapter();
+const schemaString = joiAdapter.generateSchemaFromData(data);
+const schema = new Function("Joi", `return ${schemaString}`)(Joi);
 
-  // Validate if required dependencies are installed
-  validateDependencies(): boolean;
-
-  // Get adapter name
-  getName(): string;
-
-  // Get required dependencies
-  getRequiredDependencies(): string[];
-}
+console.log(schema.validate(data));
 ```
+
+Supported types:
+
+- Primitives (`string`, `number`, `boolean`, `null`, `undefined`)
+- Complex types (`object`, `array`, `Date`)
+- Validation features (`valid()`, `alternatives().try()`, `allow(null)`)
+
+### Yup Schemas
+
+```typescript
+import { YupSchemaAdapter } from "type-explorer";
+import * as yup from "yup";
+
+const yupAdapter = new YupSchemaAdapter();
+const schemaString = yupAdapter.generateSchemaFromData(data);
+const schema = new Function("yup", `return ${schemaString}`)(yup);
+
+console.log(schema.validateSync(data));
+```
+
+Supported types:
+
+- Primitives (`string`, `number`, `boolean`, `null`, `undefined`)
+- Complex types (`object`, `array`, `Date`)
+- Validation features (`oneOf()`, `nullable()`, `optional()`)
+
+### OpenAPI Schemas
+
+```typescript
+import { OpenAPISchemaAdapter } from "type-explorer";
+
+const openAPIAdapter = new OpenAPISchemaAdapter();
+const schemaString = openAPIAdapter.generateSchemaFromData(data);
+const schema = JSON.parse(schemaString);
+console.log(schema);
+```
+
+Supported features:
+
+- OpenAPI 3.0 specification
+- All standard JSON Schema types
+- Nullable properties
+- References (`$ref`)
+- Property descriptions
 
 ## Advanced Usage
 
 ### Custom Type Handlers
+
+Register custom type handlers for specialized classes:
 
 ```typescript
 analyzer.registerCustomType("MyClass", (value, context) => ({
@@ -189,79 +204,51 @@ analyzer.registerCustomType("MyClass", (value, context) => ({
 }));
 ```
 
-### Complex Data Analysis
-
-```typescript
-const complexData = {
-  user: {
-    id: 1,
-    name: "John Doe",
-    roles: ["admin", "user"],
-    settings: {
-      theme: "dark",
-      notifications: true,
-      lastLogin: new Date(),
-    },
-    metadata: {
-      loginCount: 42,
-      preferences: {
-        language: "en",
-        timezone: "UTC",
-      },
-    },
-  },
-};
-
-// Analyze the structure
-const analysis = analyzer.analyze(complexData);
-
-// Generate a schema
-const zodAdapter = new ZodSchemaAdapter();
-const schema = zodAdapter.generateSchemaFromData(complexData);
-```
-
 ### Error Handling
-
-The library provides comprehensive error handling:
 
 ```typescript
 try {
-  const schema = zodAdapter.generateSchemaFromData(data);
-  const validationResult = schema.safeParse(invalidData);
+  const schema = adapter.generateSchemaFromData(data);
+  const validationResult = schema.safeParse(testData);
 
   if (!validationResult.success) {
-    console.log("Validation errors:", validationResult.error);
+    console.error("Validation errors:", validationResult.error);
   }
 } catch (error) {
   console.error("Schema generation error:", error);
 }
 ```
 
-## TypeScript Support
+### Type Analysis Results
 
-Full TypeScript support with comprehensive type definitions for:
+The analyzer provides detailed type information:
 
-- All interfaces and types
-- Analysis results
-- Configuration options
-- Schema adapters
-- Custom type handlers
+```typescript
+interface AnalysisResult {
+  type: string; // Type identifier
+  path: (string | number)[]; // Property path
+  properties?: Record<string, AnalysisResult>; // For objects
+  elementTypes?: Array<{
+    // For arrays
+    type: AnalysisResult;
+    frequency: number;
+    count: number;
+    indices: number[];
+  }>;
+  // ... additional type-specific properties
+}
+```
 
-## Examples
+## Contributing
 
-Check out the [examples](https://github.com/triyanox/type-explorer/tree/main/examples) directory in the repository for more detailed examples:
-
-- Basic type analysis
-- Schema generation
-- Custom type handlers
-- Complex data structures
-- Error handling
-- Integration with different validation libraries
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
 ## License
 
-MIT
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+## Links
 
-For issues and feature requests, please visit the [GitHub repository](https://github.com/triyanox/type-explorer).
+- [GitHub Repository](https://github.com/triyanox/type-explorer)
+- [Issue Tracker](https://github.com/triyanox/type-explorer/issues)
+- [Documentation](https://github.com/triyanox/type-explorer#readme)
